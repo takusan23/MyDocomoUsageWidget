@@ -1,10 +1,15 @@
 package io.github.mydocomousagewidget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.widget.RemoteViews
+import android.widget.Toast
 
 /**
  * Implementation of App Widget functionality.
@@ -28,6 +33,13 @@ class MobileDataUsageWidget : AppWidgetProvider() {
     override fun onDisabled(context: Context) {
         // Enter relevant functionality for when the last widget is disabled
     }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        super.onReceive(context, intent)
+        if (context != null) {
+            widgetUpdate(context)
+        }
+    }
 }
 
 internal fun updateAppWidget(
@@ -47,8 +59,17 @@ internal fun updateAppWidget(
         views.setTextViewText(R.id.widget_usage, "使用済み：$usage")
         views.setTextViewText(R.id.widget_total, "利用可能：$total")
         views.setProgressBar(R.id.progressBar, totalInt, usageInt, false)
+        // アイコンクリックしたら更新する
+        val intent = Intent(context, MobileDataUsageWidget::class.java)
+        val pendingIntent =
+            PendingIntent.getBroadcast(context, 2525, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        views.setOnClickPendingIntent(R.id.widget_imageView, pendingIntent)
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views)
+        // 更新したよ！
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(context, "通信量更新しました", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
