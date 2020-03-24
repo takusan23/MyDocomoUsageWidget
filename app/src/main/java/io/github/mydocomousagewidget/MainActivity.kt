@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
             }
             // Widget更新
             widgetUpdate(this)
+            phoneUsageWidgetUpdate(this)
         }
-
     }
 }
