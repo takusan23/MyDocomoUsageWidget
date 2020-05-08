@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.RemoteViews
 import android.widget.Toast
+import kotlinx.coroutines.runBlocking
 
 /**
  * Implementation of App Widget functionality.
@@ -51,11 +52,12 @@ internal fun updateAppWidget(
     // Construct the RemoteViews object
     val views = RemoteViews(context.packageName, R.layout.mobile_data_usage_widget)
     // データ取得
-    getMobileDataUsage(context) {
-        val usage = it.usage
-        val total = it.total
-        val usageInt = (it.usageFloat * 100).toInt()
-        val totalInt = (it.totalFloat * 100).toInt()
+    runBlocking {
+        val dataUsage = getMobileDataUsage(context).await() ?: return@runBlocking
+        val usage = dataUsage.usage
+        val total = dataUsage.total
+        val usageInt = (dataUsage.usageFloat * 100).toInt()
+        val totalInt = (dataUsage.totalFloat * 100).toInt()
         views.setTextViewText(R.id.widget_usage, "使用済み：$usage")
         views.setTextViewText(R.id.widget_total, "利用可能：$total")
         views.setProgressBar(R.id.progressBar, totalInt, usageInt, false)
